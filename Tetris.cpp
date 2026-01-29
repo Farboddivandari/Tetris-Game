@@ -6,12 +6,20 @@ const int HEIGHT = 20;
 int score = 0;
 int lines = 0;
 string state = "PLAYING";
-
 char Board[HEIGHT][WIDTH];
+int x = 4, y = 0;
+char O[2][2] = {{'#', '#'},
+                {'#', '#'}};
+char I[1][4] = {'#', '#', '#', '#'};
+char T[2][3] = {{'#', '#', '#'}, {'.', '#', '.'}};
+char Z[2][3] = {{'#', '#', '.'},
+                {'.', '#', '#'}};
+char L[2][3] = {{'#', '.', '.'}, {'#', '#', '#'}};
+
 void show_Menu()
 {
     cout << "_____ Tetris Game _____" << endl
-         << "1-New Game" << "\n2-Help" << "\n3_Exit" << endl;
+         << "1-New Game" << "\n2-Help" << "\n3-Exit" << endl;
 }
 
 void select_Menu()
@@ -85,12 +93,19 @@ void Render()
 {
     screen_clear();
     cout << "Score : " << score << "\tLines : " << lines << "\tState : " << state << endl;
-    cout << '+' << setw(11) << setfill('=') << '+' << endl;
+    cout << '+' << setw(WIDTH + 1) << setfill('=') << '+' << endl;
     for (size_t i = 0; i < HEIGHT; i++)
     {
         cout << "|";
         for (size_t j = 0; j < WIDTH; j++)
-            cout << Board[i][j];
+        {
+            int tempy = i - y;
+            int tempx = j - x;
+            if (tempx >= 0 && tempx < 2 && tempy >= 0 && tempy < 2 && O[tempy][tempx] == '#')
+                cout << '#';
+            else
+                cout << Board[i][j];
+        }
         cout << "|" << endl;
     }
     cout << '+' << setw(WIDTH + 1) << setfill('=') << '+' << endl;
