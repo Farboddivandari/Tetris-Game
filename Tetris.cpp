@@ -1,5 +1,7 @@
 #include <iostream>
 #include <iomanip>
+#include <conio.h>
+#include <windows.h>
 using namespace std;
 const int WIDTH = 10;
 const int HEIGHT = 20;
@@ -110,10 +112,48 @@ void Render()
     }
     cout << '+' << setw(WIDTH + 1) << setfill('=') << '+' << endl;
 }
+bool can_move(int newx, int newy)
+{
+    if (newx < 0 || newx + 1 >= WIDTH)
+        return false;
+    if (newy < 0 || newy + 1 >= HEIGHT)
+        return false;
+    return true;
+}
 int main()
 {
     Init_Board();
     select_Menu();
-    Render();
+    while (true)
+    {
+        if (_kbhit())
+        {
+            char ch;
+            ch = _getch();
+            if (ch >= 'A' && ch <= 'Z')
+                ch += 32;
+            int newx = x;
+            int newy = y;
+            if (ch == 'a')
+                newx--;
+            else if (ch == 'd')
+                newx++;
+            else if (ch == 's')
+                newy++;
+            else if (ch == 'q')
+            {
+                state = "PAUSE";
+                Render();
+                break;
+            }
+            if (can_move(newx, newy))
+            {
+                x = newx;
+                y = newy;
+            }
+        }
+        Render();
+        Sleep(80);
+    }
     return 0;
 }
