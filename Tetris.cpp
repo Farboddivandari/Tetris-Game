@@ -1,8 +1,13 @@
 #include <iostream>
+#include <iomanip>
 using namespace std;
 const int WIDTH = 10;
 const int HEIGHT = 20;
-char Board[WIDTH][HEIGHT];
+int score = 0;
+int lines = 0;
+string state = "PLAYING";
+
+char Board[HEIGHT][WIDTH];
 void show_Menu()
 {
     cout << "_____ Tetris Game _____" << endl
@@ -35,8 +40,9 @@ void select_Menu()
         char ch;
         do
         {
-            cout << "Press Q to return\n"<<endl;
-            cin>>ch;
+            cout << "Press Q to return\n"
+                 << endl;
+            cin >> ch;
         } while (!(ch == 'Q' || ch == 'q'));
         select_Menu();
         break;
@@ -71,9 +77,28 @@ void Init_Board()
             Board[i][j] = '.';
         }
 }
+void screen_clear()
+{
+    system("cls");
+}
+void Render()
+{
+    screen_clear();
+    cout << "Score : " << score << "\tLines : " << lines << "\tState : " << state << endl;
+    cout << '+' << setw(11) << setfill('=') << '+' << endl;
+    for (size_t i = 0; i < HEIGHT; i++)
+    {
+        cout << "|";
+        for (size_t j = 0; j < WIDTH; j++)
+            cout << Board[i][j];
+        cout << "|" << endl;
+    }
+    cout << '+' << setw(WIDTH + 1) << setfill('=') << '+' << endl;
+}
 int main()
 {
     Init_Board();
     select_Menu();
+    Render();
     return 0;
 }
