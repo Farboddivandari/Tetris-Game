@@ -20,7 +20,7 @@ char L[2][3] = {{'#', '.', '.'}, {'#', '#', '#'}};
 
 void show_Menu()
 {
-    cout << "_____ Tetris Game _____" << endl
+    cout << "======= Tetris Game =======" << endl
          << "1-New Game" << "\n2-Help" << "\n3-Exit" << endl;
 }
 
@@ -112,44 +112,104 @@ void Render()
     }
     cout << '+' << setw(WIDTH + 1) << setfill('=') << '+' << endl;
 }
+
 bool can_move(int newx, int newy)
 {
-    if (newx < 0 || newx + 1 >= WIDTH)
-        return false;
-    if (newy < 0 || newy + 1 >= HEIGHT)
-        return false;
+    for (size_t i = 0; i < 2; i++)
+    {
+        for (size_t j = 0; j < 2; j++)
+        {
+            if (O[i][j] == '#')
+            {
+                int tempx = newx + j;
+                int tempy = newy + i;
+                if (tempx < 0 || tempx >= WIDTH || tempy < 0 || tempy >= HEIGHT)
+                    return false;
+                if (Board[tempy][tempx] == '#')
+                    return false;
+            }
+        }
+    }
     return true;
+}
+void lock_piece()
+{
+    for (size_t i = 0; i < 2; i++)
+        for (size_t j = 0; j < 2; j++)
+            if (O[i][j] == '#')
+                Board[i + y][x + j] = '#';
+}
+void new_piece()
+{
+    x = 4;
+    y = 0;
+    if (!can_move(x, y))
+        state = "GAME OVER";
 }
 int main()
 {
     Init_Board();
     select_Menu();
-    while (true)
+    while (state != "GAME OVER")
     {
         if (_kbhit())
         {
             char ch;
             ch = _getch();
+
             if (ch >= 'A' && ch <= 'Z')
                 ch += 32;
             int newx = x;
             int newy = y;
-            if (ch == 'a')
-                newx--;
-            else if (ch == 'd')
-                newx++;
-            else if (ch == 's')
-                newy++;
-            else if (ch == 'q')
+            if (state == "PLAYING")
             {
-                state = "PAUSE";
-                Render();
-                break;
+                if (ch == 'a')
+                    newx--;
+                else if (ch == 'd')
+                    newx++;
+                else if (ch == 's')
+                {
+                    if (can_move(x, y + 1))
+                        newy++;
+                    else
+                    {
+                        lock_piece();
+                        new_piece();
+                        if (state == "GAME OVER")
+                        {
+                            Render();
+                            break;
+                        }
+                    }
+                }
+
+                else if (ch == 'q')
+                {
+                    state = "FINISHED";
+                    Render();
+                    break;
+                }
+
+                else if (ch == 'p')
+                {
+                    state = "PAUSED";
+                }
+                if (can_move(newx, newy))
+                {
+                    x = newx;
+                    y = newy;
+                }
             }
-            if (can_move(newx, newy))
+            else if (state == "PAUSED")
             {
-                x = newx;
-                y = newy;
+                if (ch == 'p')
+                    state = "PLAYING";
+                else if (ch == 'q')
+                {
+                    state = "FINISHED";
+                    Render();
+                    break;
+                }
             }
         }
         Render();
