@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
-#include <conio.h>
-#include <windows.h>
+#include <conio.h>   //_kbhit _getch
+#include <windows.h> //gettickcount   sleep
 using namespace std;
 const int WIDTH = 10;
 const int HEIGHT = 20;
@@ -139,19 +139,71 @@ void lock_piece()
             if (O[i][j] == '#')
                 Board[i + y][x + j] = '#';
 }
-void new_piece()
+void spawn_new_piece()
 {
     x = 4;
     y = 0;
     if (!can_move(x, y))
         state = "GAME OVER";
 }
+bool line_is_full(int y1)
+{
+    for (size_t j = 0; j < WIDTH; j++)
+        if (Board[y1][j] != '#')
+            return false;
+    return true;
+}
+void line_clear()
+{
+    int cleared_lines = 0;
+
+    for (int i = HEIGHT - 1; i >= 0; i--)
+    {
+        if (line_is_full(i))
+        {
+            cleared_lines++;
+            lines++;
+            for (int row = i; row > 0; row--)
+                for (size_t col = 0; col < WIDTH; col++)
+                    Board[row][col] = Board[row - 1][col];
+            for (size_t col = 0; col < WIDTH; col++)
+                Board[0][col] = '.';
+            i++;
+        }
+    }
+    switch (cleared_lines)
+    {
+    case 1:
+    {
+        score += 100;
+        break;
+    }
+    case 2:
+    {
+        score += 300;
+        break;
+    }
+    case 3:
+    {
+        score += 500;
+        break;
+    }
+    case 4:
+    {
+        score += 800;
+        break;
+    }
+    }
+}
 int main()
 {
     Init_Board();
     select_Menu();
+    DWORD last_fall_time = GetTickCount();
     while (state != "GAME OVER")
     {
+        DWORD now_time = GetTickCount();
+
         if (_kbhit())
         {
             char ch;
@@ -174,19 +226,23 @@ int main()
                     else
                     {
                         lock_piece();
-                        new_piece();
+                        line_clear();
+                        spawn_new_piece();
+
                         if (state == "GAME OVER")
                         {
                             Render();
                             break;
                         }
                     }
+                    last_fall_time = GetTickCount();
                 }
 
                 else if (ch == 'q')
                 {
                     state = "FINISHED";
                     Render();
+                    cout << "\n=======Good Bye=======\n";
                     break;
                 }
 
@@ -207,9 +263,28 @@ int main()
                 else if (ch == 'q')
                 {
                     state = "FINISHED";
+
                     Render();
+                    cout << "\n=======Good Bye=======\n";
                     break;
                 }
+            }
+        }
+        if (state == "PLAYING")
+        {
+            if (now_time - last_fall_time >= 400)
+            {
+                if (can_move(x, y + 1))
+                {
+                    y++;
+                }
+                else
+                {
+                    lock_piece();
+                    line_clear();
+                    spawn_new_piece();
+                }
+                last_fall_time = GetTickCount();
             }
         }
         Render();
