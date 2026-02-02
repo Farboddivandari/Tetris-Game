@@ -10,13 +10,32 @@ int lines = 0;
 string state = "PLAYING";
 char Board[HEIGHT][WIDTH];
 int x = 4, y = 0;
-char O[2][2] = {{'#', '#'},
-                {'#', '#'}};
-char I[1][4] = {'#', '#', '#', '#'};
-char T[2][3] = {{'#', '#', '#'}, {'.', '#', '.'}};
-char Z[2][3] = {{'#', '#', '.'},
-                {'.', '#', '#'}};
-char L[2][3] = {{'#', '.', '.'}, {'#', '#', '#'}};
+char O[4][4] = {{'#', '#', '.', '.'},
+                {'#', '#', '.', '.'},
+                {'.', '.', '.', '.'},
+                {'.', '.', '.', '.'}};
+
+char I[4][4] = {
+    {'#', '#', '#', '#'},
+    {'.', '.', '.', '.'},
+    {'.', '.', '.', '.'},
+    {'.', '.', '.', '.'}};
+
+char T[4][4] = {
+    {'#', '#', '#', '.'},
+    {'.', '#', '.', '.'},
+    {'.', '.', '.', '.'},
+    {'.', '.', '.', '.'}};
+
+char Z[4][4] = {{'#', '#', '.', '.'},
+                {'.', '#', '#', '.'},
+                {'.', '.', '.', '.'},
+                {'.', '.', '.', '.'}};
+
+char L[4][4] = {{'#', '.', '.', '.'},
+                {'#', '#', '#', '.'},
+                {'.', '.', '.', '.'},
+                {'.', '.', '.', '.'}};
 
 void show_Menu()
 {
@@ -103,7 +122,7 @@ void Render()
         {
             int tempy = i - y;
             int tempx = j - x;
-            if (tempx >= 0 && tempx < 2 && tempy >= 0 && tempy < 2 && O[tempy][tempx] == '#')
+            if (tempx >= 0 && tempx < 4 && tempy >= 0 && tempy < 4 && O[tempy][tempx] == '#')
                 cout << '#';
             else
                 cout << Board[i][j];
@@ -115,9 +134,9 @@ void Render()
 
 bool can_move(int newx, int newy)
 {
-    for (size_t i = 0; i < 2; i++)
+    for (size_t i = 0; i < 4; i++)
     {
-        for (size_t j = 0; j < 2; j++)
+        for (size_t j = 0; j < 4; j++)
         {
             if (O[i][j] == '#')
             {
@@ -134,8 +153,8 @@ bool can_move(int newx, int newy)
 }
 void lock_piece()
 {
-    for (size_t i = 0; i < 2; i++)
-        for (size_t j = 0; j < 2; j++)
+    for (size_t i = 0; i < 4; i++)
+        for (size_t j = 0; j < 4; j++)
             if (O[i][j] == '#')
                 Board[i + y][x + j] = '#';
 }
@@ -195,6 +214,34 @@ void line_clear()
     }
     }
 }
+void rotaite_piece(char piece[4][4])
+{
+    char rotate_piece[4][4];
+    for (size_t i = 0; i < 4; i++)
+    {
+        for (size_t j = 0; j < 4; j++)
+        {
+            rotate_piece[j][4 - 1 - i] = piece[i][j];
+        }
+    }
+    for (size_t i = 0; i < 4; i++)
+        for (size_t j = 0; j < 4; j++)
+        {
+            if (rotate_piece[i][j] == '#')
+            {
+                int nx = x + j;
+                int ny = y + i;
+                if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT)
+                    return;
+                if (Board[ny][nx] == '#')
+                    return;
+            }
+        }
+    for (size_t i = 0; i < 4; i++)
+        for (size_t j = 0; j < 4; j++)
+            piece[i][j] = rotate_piece[i][j];
+}
+
 int main()
 {
     Init_Board();
@@ -250,12 +297,16 @@ int main()
                 {
                     state = "PAUSED";
                 }
+                else if (ch == 'w')
+                {
+                    rotaite_piece(O);
+                }
                 if (can_move(newx, newy))
                 {
                     x = newx;
                     y = newy;
                 }
-            }
+                        }
             else if (state == "PAUSED")
             {
                 if (ch == 'p')
