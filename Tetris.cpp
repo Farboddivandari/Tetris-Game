@@ -1,5 +1,7 @@
 #include <iostream>
 #include <iomanip>
+#include <cstdlib>
+#include <ctime>
 #include <conio.h>   //_kbhit _getch
 #include <windows.h> //gettickcount   sleep
 using namespace std;
@@ -10,6 +12,8 @@ int lines = 0;
 string state = "PLAYING";
 char Board[HEIGHT][WIDTH];
 int x = 4, y = 0;
+bool start_game = true;
+int random_piece;
 char O[4][4] = {{'#', '#', '.', '.'},
                 {'#', '#', '.', '.'},
                 {'.', '.', '.', '.'},
@@ -36,6 +40,8 @@ char L[4][4] = {{'#', '.', '.', '.'},
                 {'#', '#', '#', '.'},
                 {'.', '.', '.', '.'},
                 {'.', '.', '.', '.'}};
+
+char (*piece[5])[4] = {O, I, T, Z, L};
 
 void show_Menu()
 {
@@ -89,6 +95,7 @@ void select_Menu()
         case 'y':
         {
             cout << "Good bye" << endl;
+            start_game = false;
             break;
         }
         case 'n':
@@ -122,7 +129,7 @@ void Render()
         {
             int tempy = i - y;
             int tempx = j - x;
-            if (tempx >= 0 && tempx < 4 && tempy >= 0 && tempy < 4 && O[tempy][tempx] == '#')
+            if (tempx >= 0 && tempx < 4 && tempy >= 0 && tempy < 4 && piece[random_piece][tempy][tempx] == '#')
                 cout << '#';
             else
                 cout << Board[i][j];
@@ -138,7 +145,7 @@ bool can_move(int newx, int newy)
     {
         for (size_t j = 0; j < 4; j++)
         {
-            if (O[i][j] == '#')
+            if (piece[random_piece][i][j] == '#')
             {
                 int tempx = newx + j;
                 int tempy = newy + i;
@@ -155,7 +162,7 @@ void lock_piece()
 {
     for (size_t i = 0; i < 4; i++)
         for (size_t j = 0; j < 4; j++)
-            if (O[i][j] == '#')
+            if (piece[random_piece][i][j] == '#')
                 Board[i + y][x + j] = '#';
 }
 void spawn_new_piece()
@@ -164,6 +171,7 @@ void spawn_new_piece()
     y = 0;
     if (!can_move(x, y))
         state = "GAME OVER";
+    random_piece = rand() % (4 - 0 + 1) + 0;
 }
 bool line_is_full(int y1)
 {
@@ -214,7 +222,7 @@ void line_clear()
     }
     }
 }
-void rotaite_piece(char piece[4][4])
+void rotate_piece(char piece[4][4])
 {
     char rotate_piece[4][4];
     for (size_t i = 0; i < 4; i++)
@@ -244,8 +252,12 @@ void rotaite_piece(char piece[4][4])
 
 int main()
 {
+    srand(time(0));
+    spawn_new_piece();
     Init_Board();
     select_Menu();
+    if (!start_game)
+        return 0;
     DWORD last_fall_time = GetTickCount();
     while (state != "GAME OVER")
     {
@@ -299,14 +311,14 @@ int main()
                 }
                 else if (ch == 'w')
                 {
-                    rotaite_piece(O);
+                    rotate_piece(piece[random_piece]);
                 }
                 if (can_move(newx, newy))
                 {
                     x = newx;
                     y = newy;
                 }
-                        }
+            }
             else if (state == "PAUSED")
             {
                 if (ch == 'p')
