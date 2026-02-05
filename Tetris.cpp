@@ -2,14 +2,16 @@
 #include <iomanip>
 #include <cstdlib>
 #include <ctime>
-#include <conio.h>   //_kbhit _getch
-#include <windows.h> //gettickcount   sleep
+#include <conio.h>
+#include <windows.h>
 using namespace std;
 const int WIDTH = 10;
 const int HEIGHT = 20;
 int score = 0;
 int lines = 0;
 string state = "PLAYING";
+string level = "Easy";
+int fall_time = 400;
 char Board[HEIGHT][WIDTH];
 int x = 4, y = 0;
 bool start_game = true;
@@ -120,7 +122,7 @@ void screen_clear()
 void Render()
 {
     screen_clear();
-    cout << "Score : " << score << "\tLines : " << lines << "\tState : " << state << endl;
+    cout << "Score : " << score << "\tLines : " << lines << "\tState : " << state << "\tLevel : " << level << endl;
     cout << '+' << setw(WIDTH + 1) << setfill('=') << '+' << endl;
     for (size_t i = 0; i < HEIGHT; i++)
     {
@@ -221,6 +223,21 @@ void line_clear()
         break;
     }
     }
+    if (score > 1000)
+    {
+        level = "Hard";
+        fall_time = 120;
+    }
+    else if (score > 500)
+    {
+        level = "Normal";
+        fall_time = 250;
+    }
+    else
+    {
+        level = "Easy";
+        fall_time = 400;
+    }
 }
 void rotate_piece(char piece[4][4])
 {
@@ -252,6 +269,7 @@ void rotate_piece(char piece[4][4])
 
 int main()
 {
+    screen_clear();
     srand(time(0));
     spawn_new_piece();
     Init_Board();
@@ -335,7 +353,7 @@ int main()
         }
         if (state == "PLAYING")
         {
-            if (now_time - last_fall_time >= 400)
+            if (now_time - last_fall_time >= fall_time)
             {
                 if (can_move(x, y + 1))
                 {
